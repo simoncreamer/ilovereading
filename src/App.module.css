@@ -1,0 +1,518 @@
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+
+.pageCenter {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: #f9f9f8;
+}
+
+.splitRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fff;
+}
+
+.splitTopBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #e8e8e6;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.splitBody {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.splitLeft {
+  flex: 0 0 50%;
+  overflow-y: auto;
+  padding: 1.5rem 1.5rem;
+  border-right: 1px solid #e8e8e6;
+}
+
+.splitRight {
+  flex: 0 0 50%;
+  overflow-y: auto;
+  padding: 1.5rem 1.5rem;
+}
+
+/* ── Home ───────────────────────────────────────────────────────────────── */
+
+.homeWrap {
+  width: 100%;
+  max-width: 600px;
+}
+
+.homeHero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.homeTitle {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+
+.homeSub {
+  font-size: 15px;
+  color: #666;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+
+.homeActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.errorBox {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #FCEBEB;
+  border: 1px solid #F09595;
+  border-radius: 8px;
+  color: #791F1F;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ── Stat card ──────────────────────────────────────────────────────────── */
+
+.statCard {
+  background: #f3f3f1;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+
+.primaryBtn {
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.outlineBtn {
+  background: transparent;
+  color: #1a1a1a;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 11px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.outlineBtn:hover {
+  background: #f3f3f1;
+}
+
+.ghostBtn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ghostBtn:hover {
+  color: #1a1a1a;
+}
+
+/* ── Pills & tags ───────────────────────────────────────────────────────── */
+
+.levelPill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #f3f3f1;
+  color: #666;
+}
+
+/* ── Progress dots ──────────────────────────────────────────────────────── */
+
+.progressDots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot_unanswered { background: #ccc; }
+.dot_correct    { background: #3B6D11; }
+.dot_wrong      { background: #A32D2D; }
+
+/* ── Spinner ────────────────────────────────────────────────────────────── */
+
+.spinnerWrap {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid #e0e0e0;
+  border-top-color: #1a1a1a;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.spinnerText {
+  font-size: 14px;
+  color: #888;
+}
+
+/* ── Passage ────────────────────────────────────────────────────────────── */
+
+.passageTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.passagePara {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+/* ── Questions ──────────────────────────────────────────────────────────── */
+
+.questionsHeader {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #999;
+  margin-bottom: 1.25rem;
+}
+
+.questionBlock {
+  margin-bottom: 1.75rem;
+}
+
+.questionText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 1.6;
+  margin-bottom: 0.6rem;
+}
+
+.submitRow {
+  padding-top: 0.5rem;
+  padding-bottom: 2rem;
+}
+
+/* ── Radio option ───────────────────────────────────────────────────────── */
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1.5px solid #d0d0ce;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+  user-select: none;
+}
+
+.radioOption:hover.radioOption_idle {
+  border-color: #999;
+  background: #fafaf9;
+}
+
+.radioOption_correct {
+  background: #EAF3DE;
+  border-color: #3B6D11;
+  cursor: default;
+}
+
+.radioOption_wrong {
+  background: #FCEBEB;
+  border-color: #A32D2D;
+  cursor: default;
+}
+
+.radioOption_reveal {
+  background: #EAF3DE;
+  border-color: #3B6D11;
+  cursor: default;
+}
+
+.radioDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.12s;
+}
+
+.radioOption_correct .radioDot,
+.radioOption_reveal  .radioDot { border-color: #3B6D11; }
+.radioOption_wrong   .radioDot { border-color: #A32D2D; }
+
+.radioDotInner {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.12s;
+}
+
+.radioOption_correct .radioDotInner,
+.radioOption_reveal  .radioDotInner { background: #3B6D11; }
+.radioOption_wrong   .radioDotInner { background: #A32D2D; }
+
+.radioLabel {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+.radioOption_correct .radioLabel { color: #27500A; font-weight: 500; }
+.radioOption_wrong   .radioLabel { color: #791F1F; font-weight: 500; }
+.radioOption_reveal  .radioLabel { color: #27500A; font-weight: 500; }
+
+.radioHint {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-left: 4px;
+}
+
+/* ── Result ─────────────────────────────────────────────────────────────── */
+
+.resultCard {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border: 1px solid #e8e8e6;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.resultScoreLabel {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.resultScore {
+  font-size: 56px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.resultMsg {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 1.25rem;
+}
+
+.resultBadge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 16px;
+  border-radius: 20px;
+  margin-bottom: 1.75rem;
+}
+
+.resultBadge_up   { background: #EAF3DE; color: #27500A; }
+.resultBadge_same { background: #FAEEDA; color: #633806; }
+.resultBadge_down { background: #FCEBEB; color: #791F1F; }
+
+.resultActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── History ────────────────────────────────────────────────────────────── */
+
+.historyWrap {
+  width: 100%;
+  max-width: 680px;
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.historyTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.historyEmpty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #888;
+  font-size: 14px;
+}
+
+.historyRow {
+  background: #fff;
+  border: 1px solid #e8e8e6;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.12s;
+}
+
+.historyRow:hover {
+  background: #fafaf9;
+}
+
+.historyRowLeft {
+  min-width: 0;
+}
+
+.historyRowTitle {
+  font-weight: 500;
+  font-size: 14px;
+  color: #1a1a1a;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historyRowMeta {
+  font-size: 12px;
+  color: #888;
+}
+
+.historyRowScore {
+  text-align: right;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.historyRowPct {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.historyRowFrac {
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .splitBody {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .splitLeft {
+    flex: none;
+    border-right: none;
+    border-bottom: 1px solid #e8e8e6;
+    padding: 1.25rem 1rem;
+  }
+
+  .splitRight {
+    flex: none;
+    padding: 1.25rem 1rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+}
