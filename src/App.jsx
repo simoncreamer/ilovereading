@@ -4,7 +4,7 @@ import styles from './App.module.css'
 // ─── ACSF levels ────────────────────────────────────────────────────────────
 
 const LEVELS = [
-  { id: 'pla-low',  label: 'PLA',     sublabel: 'Low',  qCount: 3, desc: 'Pre-Level A (early). Single very short sentences, 3-5 word sentences only, the most common 100 words, one simple concrete idea. Example topics: a pet, the weather, food. Maximum 2-3 sentences total.' },
+  { id: 'pla-low',  label: 'PLA',     sublabel: 'Low',  qCount: 3, desc: 'Pre-Level A (low). Single very short sentences, 3-5 word sentences only, the most common 100 words, one simple concrete idea. Example topics: a pet, the weather, food. Maximum 2-3 sentences total.' },
   { id: 'pla-mid',  label: 'PLA',     sublabel: 'Mid',  qCount: 3, desc: 'Pre-Level A (mid). Short simple sentences of 5-8 words. High-frequency words. One clear idea per sentence. 3-4 sentences total. Example topics: daily routines, animals, simple actions.' },
   { id: 'pla-high', label: 'PLA',     sublabel: 'High', qCount: 4, desc: "Pre-Level A (high). Simple sentences up to 10 words, very familiar vocabulary, 1 short paragraph (4-5 sentences). Some connecting words like 'and', 'but', 'so'. Example topics: family, school, seasons." },
   { id: 'plb-low',  label: 'PLB',     sublabel: 'Low',  qCount: 4, desc: 'Pre-Level B (low). Simple sentences in a short paragraph (5-6 sentences). Familiar everyday vocabulary, minimal complex words. Simple narrative or factual structure. Example topics: community, animals, simple events.' },
@@ -172,7 +172,7 @@ export default function App() {
     setScreen(SCREEN.LOADING)
     const genre = Math.random() < 0.5 ? 'fiction' : 'non-fiction'
 
-    const prompt = `Generate a ${genre} reading passage for an Australian adult literacy student at ACSF level: ${level.label}${level.sublabel ? ' ' + level.sublabel : ''}.
+    const prompt = `Generate a ${genre} reading passage for a migrant Australian adult literacy student at ACSF level: ${level.label}${level.sublabel ? ' ' + level.sublabel : ''}.
 
 Level description: ${level.desc}
 
@@ -224,20 +224,20 @@ Return ONLY valid JSON, no markdown fences, no extra text:
       if (newIndex > levelIndex) {
         const nl = LEVELS[newIndex]
         badge = `Level up! → ${nl.label}${nl.sublabel ? ' ' + nl.sublabel : ''}`
-        badgeType = 'up'; msg = 'Excellent! Moving you to a higher level.'
+        badgeType = 'up'; msg = 'Great!'
       } else {
         badge = "You've reached the highest level!"; badgeType = 'up'; msg = 'Outstanding — Level 3 mastered!'
       }
     } else if (pct >= 60) {
-      badge = `Staying at ${lvLabel}`; badgeType = 'same'; msg = 'Good effort. Keep practising at this level.'
+      badge = `Staying at ${lvLabel}`; badgeType = 'same'; msg = "Great!"
     } else {
       newIndex = Math.max(levelIndex - 1, 0)
       if (newIndex < levelIndex) {
         const nl = LEVELS[newIndex]
         badge = `Adjusting down → ${nl.label}${nl.sublabel ? ' ' + nl.sublabel : ''}`
-        badgeType = 'down'; msg = "Let's try something a little easier next."
+        badgeType = 'down'; msg = "Great!"
       } else {
-        badge = 'Staying at PLA Low'; badgeType = 'same'; msg = "Keep reading — you'll improve!"
+        badge = 'Staying at PLA Low'; badgeType = 'same'; msg = "Great!"
       }
     }
 
@@ -277,8 +277,8 @@ Return ONLY valid JSON, no markdown fences, no extra text:
     <div className={styles.pageCenter}>
       <div className={styles.homeWrap}>
         <div className={styles.homeHero}>
-          <h1 className={styles.homeTitle}>Adaptive Reading</h1>
-          <p className={styles.homeSub}>Texts that grow with you — ACSF levels</p>
+          <h1 className={styles.homeTitle}>I love reading :)</h1>
+          <p className={styles.homeSub}>Readings based on ACSF Level PLA to 3</p>
         </div>
         <div className={styles.statsGrid}>
           <StatCard label="ACSF level" value={lvLabel} />
@@ -286,7 +286,7 @@ Return ONLY valid JSON, no markdown fences, no extra text:
           <StatCard label="Avg score"  value={avgScore !== null ? avgScore + '%' : '—'} />
         </div>
         <div className={styles.homeActions}>
-          <PrimaryBtn onClick={() => generateReading(levelIndex)}>Next reading</PrimaryBtn>
+          <PrimaryBtn onClick={() => generateReading(levelIndex)}>New text</PrimaryBtn>
           <OutlineBtn onClick={() => { setHistoryItem(null); setScreen(SCREEN.HISTORY) }}>
             History{history.length > 0 ? ` (${history.length})` : ''}
           </OutlineBtn>
@@ -329,7 +329,7 @@ Return ONLY valid JSON, no markdown fences, no extra text:
           {result.badge}
         </div>
         <div className={styles.resultActions}>
-          <PrimaryBtn onClick={() => generateReading(result.newIndex)}>Next reading</PrimaryBtn>
+          <PrimaryBtn onClick={() => generateReading(result.newIndex)}>New text</PrimaryBtn>
           <OutlineBtn onClick={() => setScreen(SCREEN.HOME)}>Home</OutlineBtn>
         </div>
       </div>
@@ -344,7 +344,7 @@ Return ONLY valid JSON, no markdown fences, no extra text:
           <GhostBtn onClick={() => setScreen(SCREEN.HOME)}>← Back</GhostBtn>
         </div>
         {history.length === 0
-          ? <div className={styles.historyEmpty}>No readings yet. Complete a reading to see it here.</div>
+          ? <div className={styles.historyEmpty}>No readings yet.</div>
           : history.map((item, i) => (
             <div key={i} className={styles.historyRow} onClick={() => { setHistoryItem(item); setScreen(SCREEN.HISTORY_ITEM) }}>
               <div className={styles.historyRowLeft}>
