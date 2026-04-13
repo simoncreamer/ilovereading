@@ -277,7 +277,7 @@ Return ONLY valid JSON, no markdown fences, no extra text:
     <div className={styles.pageCenter}>
       <div className={styles.homeWrap}>
         <div className={styles.homeHero}>
-          <h1 className={styles.homeTitle}>I love reading :)</h1>
+          <h1 className={styles.homeTitle}>I love reading</h1>
           <p className={styles.homeSub}>Readings based on ACSF Level PLA to 3</p>
         </div>
         <div className={styles.statsGrid}>
