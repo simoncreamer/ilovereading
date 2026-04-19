@@ -351,6 +351,20 @@ Return ONLY valid JSON, no markdown fences, no extra text:
   if (!authReady || profileLoading) return (
     <div className={styles.pageCenter}><Spinner text="Loading..." /></div>
   )
+  if (!user) return (
+  <div className={styles.pageCenter}>
+    <div className={styles.homeWrap}>
+      <div className={styles.homeHero}>
+        <h1 className={styles.homeTitle}>Adaptive Reading</h1>
+        <p className={styles.homeSub}>Please log in to continue</p>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <PrimaryBtn onClick={() => setShowAuth(true)}>Log in</PrimaryBtn>
+      </div>
+      {showAuth && <Auth onClose={() => setShowAuth(false)} />}
+    </div>
+  </div>
+)
 
   // ─────────────────────────────────────────────────────────────────────────
 
