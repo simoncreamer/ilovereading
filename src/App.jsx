@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import styles from './App.module.css'
+import Auth from './Auth.jsx'
+import { supabase } from './supabase.js'
 
-// ─── ACSF levels ────────────────────────────────────────────────────────────
+// ─── ACSF levels ─────────────────────────────────────────────────────────────
 
 const LEVELS = [
-  { id: 'pla-low',  label: 'PLA',     sublabel: 'Low',  qCount: 3, desc: 'Pre-Level A (low). Single very short sentences, 3-5 word sentences only, the most common 100 words, one simple concrete idea. Example topics: a pet, the weather, food. Maximum 2-3 sentences total.' },
+  { id: 'pla-low',  label: 'PLA',     sublabel: 'Low',  qCount: 3, desc: 'Pre-Level A (early). Single very short sentences, 3-5 word sentences only, the most common 100 words, one simple concrete idea. Example topics: a pet, the weather, food. Maximum 2-3 sentences total.' },
   { id: 'pla-mid',  label: 'PLA',     sublabel: 'Mid',  qCount: 3, desc: 'Pre-Level A (mid). Short simple sentences of 5-8 words. High-frequency words. One clear idea per sentence. 3-4 sentences total. Example topics: daily routines, animals, simple actions.' },
   { id: 'pla-high', label: 'PLA',     sublabel: 'High', qCount: 4, desc: "Pre-Level A (high). Simple sentences up to 10 words, very familiar vocabulary, 1 short paragraph (4-5 sentences). Some connecting words like 'and', 'but', 'so'. Example topics: family, school, seasons." },
   { id: 'plb-low',  label: 'PLB',     sublabel: 'Low',  qCount: 4, desc: 'Pre-Level B (low). Simple sentences in a short paragraph (5-6 sentences). Familiar everyday vocabulary, minimal complex words. Simple narrative or factual structure. Example topics: community, animals, simple events.' },
@@ -22,7 +24,7 @@ const SCREEN = {
   RESULT: 'result', HISTORY: 'history', HISTORY_ITEM: 'history_item',
 }
 
-// ─── API call (goes through our serverless proxy) ────────────────────────────
+// ─── API ──────────────────────────────────────────────────────────────────────
 
 async function callClaude(prompt) {
   const res = await fetch('/api/generate', {
@@ -30,17 +32,36 @@ async function callClaude(prompt) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }),
   })
-  if (!res.ok) {
-    const txt = await res.text()
-    throw new Error(`API ${res.status}: ${txt}`)
-  }
+  if (!res.ok) { const txt = await res.text(); throw new Error(`API ${res.status}: ${txt}`) }
   const data = await res.json()
   if (data.error) throw new Error(data.error)
   const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim()
   return JSON.parse(raw)
 }
 
-// ─── Small UI components ─────────────────────────────────────────────────────
+// ─── Supabase helpers ─────────────────────────────────────────────────────────
+
+async function loadProfile(userId) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+  return data
+}
+
+async function saveProfile(userId, { levelIndex, textsRead, scores, history }) {
+  await supabase.from('profiles').upsert({
+    id: userId,
+    level_index: levelIndex,
+    texts_read: textsRead,
+    scores,
+    history,
+    updated_at: new Date().toISOString(),
+  })
+}
+
+// ─── UI components ────────────────────────────────────────────────────────────
 
 function StatCard({ label, value }) {
   return (
@@ -72,41 +93,29 @@ function PrimaryBtn({ onClick, disabled, children }) {
 }
 
 function OutlineBtn({ onClick, children }) {
-  return (
-    <button className={styles.outlineBtn} onClick={onClick}>
-      {children}
-    </button>
-  )
+  return <button className={styles.outlineBtn} onClick={onClick}>{children}</button>
 }
 
 function GhostBtn({ onClick, children }) {
-  return (
-    <button className={styles.ghostBtn} onClick={onClick}>
-      {children}
-    </button>
-  )
+  return <button className={styles.ghostBtn} onClick={onClick}>{children}</button>
 }
 
-function Spinner() {
+function Spinner({ text }) {
   return (
     <div className={styles.spinnerWrap}>
       <div className={styles.spinner} />
-      <div className={styles.spinnerText}>Generating your reading...</div>
+      <div className={styles.spinnerText}>{text || 'Generating your reading...'}</div>
     </div>
   )
 }
 
-// ─── Radio option ─────────────────────────────────────────────────────────────
-
 function RadioOption({ label, state, onClick }) {
-  // state: 'idle' | 'correct' | 'wrong' | 'reveal'
   const cls = [styles.radioOption, styles['radioOption_' + state]].filter(Boolean).join(' ')
   return (
-    <div className={cls} onClick={state === 'idle' ? onClick : undefined} role="button" tabIndex={state === 'idle' ? 0 : -1}
+    <div className={cls} onClick={state === 'idle' ? onClick : undefined}
+      role="button" tabIndex={state === 'idle' ? 0 : -1}
       onKeyDown={e => { if (state === 'idle' && (e.key === 'Enter' || e.key === ' ')) onClick() }}>
-      <div className={styles.radioDot}>
-        <div className={styles.radioDotInner} />
-      </div>
+      <div className={styles.radioDot}><div className={styles.radioDotInner} /></div>
       <span className={styles.radioLabel}>
         {label}
         {state === 'correct' && <span className={styles.radioHint}> ✓ Correct</span>}
@@ -133,8 +142,6 @@ function QuestionBlock({ q, qi, picked, onPick }) {
   )
 }
 
-// ─── Split layout ─────────────────────────────────────────────────────────────
-
 function SplitLayout({ topBar, leftContent, rightContent }) {
   return (
     <div className={styles.splitRoot}>
@@ -147,7 +154,7 @@ function SplitLayout({ topBar, leftContent, rightContent }) {
   )
 }
 
-// ─── Main App ────────────────────────────────────────────────────────────────
+// ─── Main App ─────────────────────────────────────────────────────────────────
 
 export default function App() {
   const [screen, setScreen]           = useState(SCREEN.HOME)
@@ -162,17 +169,67 @@ export default function App() {
   const [history, setHistory]         = useState([])
   const [historyItem, setHistoryItem] = useState(null)
 
-  const lv       = LEVELS[levelIndex]
+  // Auth state
+  const [user, setUser]               = useState(null)
+  const [authReady, setAuthReady]     = useState(false)
+  const [showAuth, setShowAuth]       = useState(false)
+  const [profileLoading, setProfileLoading] = useState(false)
+
+  const lv      = LEVELS[levelIndex]
   const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null
   const lvLabel  = lv.label + (lv.sublabel ? ' ' + lv.sublabel : '')
 
+  // ── Auth listener — runs once on mount ──
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setAuthReady(true)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // ── Load profile when user logs in ──
+  useEffect(() => {
+    if (!user) return
+    setProfileLoading(true)
+    loadProfile(user.id).then(profile => {
+      if (profile) {
+        setLevelIndex(profile.level_index ?? 0)
+        setTextsRead(profile.texts_read ?? 0)
+        setScores(profile.scores ?? [])
+        setHistory(profile.history ?? [])
+      }
+      setProfileLoading(false)
+    })
+  }, [user])
+
+  // ── Save profile whenever progress changes (only if logged in) ──
+  useEffect(() => {
+    if (!user || profileLoading) return
+    saveProfile(user.id, { levelIndex, textsRead, scores, history })
+  }, [user, levelIndex, textsRead, scores, history])
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    // Reset progress to defaults on sign out
+    setLevelIndex(0)
+    setTextsRead(0)
+    setScores([])
+    setHistory([])
+    setScreen(SCREEN.HOME)
+  }
+
+  // ── Generate reading ──
   const generateReading = useCallback(async (idx) => {
     const level = LEVELS[idx]
     setError('')
     setScreen(SCREEN.LOADING)
     const genre = Math.random() < 0.5 ? 'fiction' : 'non-fiction'
 
-    const prompt = `Generate a ${genre} reading passage for a migrant Australian adult literacy student at ACSF level: ${level.label}${level.sublabel ? ' ' + level.sublabel : ''}.
+    const prompt = `Generate a ${genre} reading passage for an Australian adult literacy student at ACSF level: ${level.label}${level.sublabel ? ' ' + level.sublabel : ''}.
 
 Level description: ${level.desc}
 
@@ -215,8 +272,13 @@ Return ONLY valid JSON, no markdown fences, no extra text:
     const total   = passage.questions.length
     const correct = passage.questions.filter((q, i) => answers[i] === q.correct).length
     const pct     = Math.round((correct / total) * 100)
-    setScores(s => [...s, pct])
-    setTextsRead(t => t + 1)
+
+    const newScores = [...scores, pct]
+    const newTextsRead = textsRead + 1
+    const newHistory = [
+      { passage, answers: { ...answers }, pct, correct, total, levelLabel: lvLabel, date: new Date().toLocaleString() },
+      ...history,
+    ]
 
     let badge, badgeType, msg, newIndex = levelIndex
     if (pct > 80) {
@@ -224,30 +286,31 @@ Return ONLY valid JSON, no markdown fences, no extra text:
       if (newIndex > levelIndex) {
         const nl = LEVELS[newIndex]
         badge = `Level up! → ${nl.label}${nl.sublabel ? ' ' + nl.sublabel : ''}`
-        badgeType = 'up'; msg = 'Great!'
+        badgeType = 'up'; msg = 'Excellent! Moving you to a higher level.'
       } else {
         badge = "You've reached the highest level!"; badgeType = 'up'; msg = 'Outstanding — Level 3 mastered!'
       }
     } else if (pct >= 60) {
-      badge = `Staying at ${lvLabel}`; badgeType = 'same'; msg = "Great!"
+      badge = `Staying at ${lvLabel}`; badgeType = 'same'; msg = 'Good effort. Keep practising at this level.'
     } else {
       newIndex = Math.max(levelIndex - 1, 0)
       if (newIndex < levelIndex) {
         const nl = LEVELS[newIndex]
         badge = `Adjusting down → ${nl.label}${nl.sublabel ? ' ' + nl.sublabel : ''}`
-        badgeType = 'down'; msg = "Great!"
+        badgeType = 'down'; msg = "Let's try something a little easier next."
       } else {
-        badge = 'Staying at PLA Low'; badgeType = 'same'; msg = "Great!"
+        badge = 'Staying at PLA Low'; badgeType = 'same'; msg = "Keep reading — you'll improve!"
       }
     }
 
-    setHistory(h => [{ passage, answers: { ...answers }, pct, correct, total, levelLabel: lvLabel, date: new Date().toLocaleString() }, ...h])
+    setScores(newScores)
+    setTextsRead(newTextsRead)
+    setHistory(newHistory)
     setLevelIndex(newIndex)
     setResult({ pct, correct, total, badge, badgeType, msg, newIndex })
     setScreen(SCREEN.RESULT)
   }
 
-  // ── Passage pane (reused in questions + history) ──
   const makePassagePane = (p) => (
     <div>
       <h2 className={styles.passageTitle}>{p.title}</h2>
@@ -257,7 +320,6 @@ Return ONLY valid JSON, no markdown fences, no extra text:
     </div>
   )
 
-  // ── Progress dots ──
   const progressDots = passage ? (
     <div className={styles.progressDots}>
       {passage.questions.map((q, i) => {
@@ -268,17 +330,42 @@ Return ONLY valid JSON, no markdown fences, no extra text:
     </div>
   ) : null
 
-  // ──────────────────────────────────────────────────────────────────────────
+  // ── Auth bar shown at top of home screen ──
+  const authBar = (
+    <div className={styles.authBar}>
+      {user ? (
+        <>
+          <span className={styles.authEmail}>{user.email}</span>
+          <button className={styles.authLink} onClick={handleSignOut}>Sign out</button>
+        </>
+      ) : (
+        <>
+          <span className={styles.authGuest}>Not signed in — progress won't be saved</span>
+          <button className={styles.authLink} onClick={() => setShowAuth(true)}>Log in / Sign up</button>
+        </>
+      )}
+    </div>
+  )
+
+  // ── Wait for Supabase to check session before rendering ──
+  if (!authReady || profileLoading) return (
+    <div className={styles.pageCenter}><Spinner text="Loading..." /></div>
+  )
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   if (screen === SCREEN.LOADING) return (
     <div className={styles.pageCenter}><Spinner /></div>
   )
 
   if (screen === SCREEN.HOME) return (
     <div className={styles.pageCenter}>
+      {showAuth && <Auth onClose={() => setShowAuth(false)} />}
       <div className={styles.homeWrap}>
+        {authBar}
         <div className={styles.homeHero}>
-          <h1 className={styles.homeTitle}>I love reading</h1>
-          <p className={styles.homeSub}>Readings based on ACSF Level PLA to 3</p>
+          <h1 className={styles.homeTitle}>Adaptive Reading</h1>
+          <p className={styles.homeSub}>Texts that grow with you — ACSF levels</p>
         </div>
         <div className={styles.statsGrid}>
           <StatCard label="ACSF level" value={lvLabel} />
@@ -286,7 +373,7 @@ Return ONLY valid JSON, no markdown fences, no extra text:
           <StatCard label="Avg score"  value={avgScore !== null ? avgScore + '%' : '—'} />
         </div>
         <div className={styles.homeActions}>
-          <PrimaryBtn onClick={() => generateReading(levelIndex)}>New text</PrimaryBtn>
+          <PrimaryBtn onClick={() => generateReading(levelIndex)}>Next reading</PrimaryBtn>
           <OutlineBtn onClick={() => { setHistoryItem(null); setScreen(SCREEN.HISTORY) }}>
             History{history.length > 0 ? ` (${history.length})` : ''}
           </OutlineBtn>
@@ -328,8 +415,9 @@ Return ONLY valid JSON, no markdown fences, no extra text:
         <div className={[styles.resultBadge, styles['resultBadge_' + result.badgeType]].join(' ')}>
           {result.badge}
         </div>
+        {user && <div className={styles.savedNote}>Progress saved</div>}
         <div className={styles.resultActions}>
-          <PrimaryBtn onClick={() => generateReading(result.newIndex)}>New text</PrimaryBtn>
+          <PrimaryBtn onClick={() => generateReading(result.newIndex)}>Next reading</PrimaryBtn>
           <OutlineBtn onClick={() => setScreen(SCREEN.HOME)}>Home</OutlineBtn>
         </div>
       </div>
@@ -344,7 +432,7 @@ Return ONLY valid JSON, no markdown fences, no extra text:
           <GhostBtn onClick={() => setScreen(SCREEN.HOME)}>← Back</GhostBtn>
         </div>
         {history.length === 0
-          ? <div className={styles.historyEmpty}>No readings yet.</div>
+          ? <div className={styles.historyEmpty}>No readings yet. Complete a reading to see it here.</div>
           : history.map((item, i) => (
             <div key={i} className={styles.historyRow} onClick={() => { setHistoryItem(item); setScreen(SCREEN.HISTORY_ITEM) }}>
               <div className={styles.historyRowLeft}>
